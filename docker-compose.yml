@@ -1,27 +1,48 @@
 # @format
 
-version: "3"
+version: "3.8" # Ensure version is compatible with Docker Swarm
 services:
   api:
-    build: ./api
+    image: yourusername/api:tag # Replace with your Docker Hub image and tag
     ports:
       - "3000:3000"
+    deploy:
+      replicas: 2 # Number of replicas; adjust as needed
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+      restart_policy:
+        condition: on-failure
     depends_on:
       - backend
 
   backend:
-    build: ./backend
+    image: yourusername/backend:tag # Replace with your Docker Hub image and tag
     ports:
       - "4000:4000"
-    depends_on:
-      - db
+    deploy:
+      replicas: 2 # Number of replicas; adjust as needed
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+      restart_policy:
+        condition: on-failure
     environment:
       DATABASE_URL: postgresql://postgres:password@db:5432/mydb
+    depends_on:
+      - db
 
   db:
     image: postgres:16
     ports:
       - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
     environment:
       POSTGRES_DB: mydb
       POSTGRES_USER: postgres
